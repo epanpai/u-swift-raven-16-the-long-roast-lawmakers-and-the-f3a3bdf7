@@ -46,7 +46,8 @@ const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 // exactly one line (no newline at all), no leading/trailing whitespace
 // that would pad the judged text, and no control characters that would
 // make the judged text anything but one clean line. The line is
-// 247 characters.
+// 247 characters. It must also read as one sentence: a single terminal
+// period, no doubled spaces, and no second sentence hiding after it.
 if (
   LINE.length < 1 ||
   LINE.length > 320 ||
@@ -54,7 +55,10 @@ if (
   LINE !== LINE.trim() ||
   /[\r\n]/.test(LINE) ||
   // eslint-disable-next-line no-control-regex
-  /[\u0000-\u001f\u007f]/.test(LINE)
+  /[\u0000-\u001f\u007f]/.test(LINE) ||
+  !/\.$/.test(LINE) ||
+  (LINE.match(/\./g) ?? []).length !== 2 || // one abbreviation dot (AI_Safety_FINAL.pdf) + terminal period
+  /  /.test(LINE)
 ) {
   throw new Error(`entry violates the gate: ${LINE.length} chars`);
 }
